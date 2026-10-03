@@ -196,7 +196,7 @@ function parseAssets(rows) {
     const v = toNum(cell(rows, r, H["금액"]));
     const t = cell(rows, r, H["유형"]).trim();
     if (k === "투자") continue;
-    if (k === "부채") { debt = { o, nm, v: Math.abs(v) }; continue; }
+    if (k === "부채") { debt = { o, nm, t: t || "부동산", v: Math.abs(v) }; continue; }
     asset.push({ o, k: "자본", t, nm, v, liq: nm.indexOf("주택청약") < 0 });
   }
   if (!asset.length) return null;
@@ -224,6 +224,10 @@ function parseMarket(rows) {
 }
 
 /* --- 수익률시계열 --- */
+const colOf = (H, names) => {
+  for (const n of [].concat(names)) if (H[nz(n)] !== undefined) return H[nz(n)];
+  return undefined;
+};
 function parseBlock(rows, label, keys) {
   const L = nz(label);
   const need = Object.keys(keys);
@@ -234,7 +238,7 @@ function parseBlock(rows, label, keys) {
     for (let c = 0; c < (rows[r] || []).length; c++) {
       if (nz(rows[r][c]) !== L) continue;
       const H = colMap(rows[r + 1], c);
-      if (H["날짜"] !== undefined && need.some((k) => H[keys[k]] !== undefined)) {
+      if (H["날짜"] !== undefined && need.some((k) => colOf(H, keys[k]) !== undefined)) {
         hr = r + 1; c0 = c; dateCol = H["날짜"];
       }
       break;
@@ -247,7 +251,7 @@ function parseBlock(rows, label, keys) {
         const v = nz(rows[r][c]);
         if (v.length <= L.length || v.indexOf(L) !== 0) continue;
         const H = colMap(rows[r], c);
-        if (need.some((k) => H[keys[k]] !== undefined)) { hr = r; c0 = c; dateCol = c; break; }
+        if (need.some((k) => colOf(H, keys[k]) !== undefined)) { hr = r; c0 = c; dateCol = c; break; }
       }
     }
   }
@@ -261,7 +265,7 @@ function parseBlock(rows, label, keys) {
     const mm = d.match(/(\d{4})[-.\/\s]+(\d{1,2})/);
     if (!mm) break;
     const rec = { m: parseInt(mm[2], 10) + "월" };
-    need.forEach((k) => { const i = H[keys[k]]; rec[k] = i === undefined ? 0 : toNum(cell(rows, r, i)); });
+    need.forEach((k) => { const i = colOf(H, keys[k]); rec[k] = i === undefined ? 0 : toNum(cell(rows, r, i)); });
     out.push(rec);
   }
   return out.length ? out : null;
@@ -286,6 +290,7 @@ function parseSeriesByShape(rows) {
       m: (mm ? parseInt(mm[1], 10) : 0) + "월",
       end: toNum(cell(rows, r, b + 4)), cost: toNum(cell(rows, r, b + 5)),
       pl: toNum(cell(rows, r, b + 6)), r: toNum(cell(rows, r, b + 7)), twr: toNum(cell(rows, r, b + 8)),
+      mwr: toNum(cell(rows, r, b + 9)), nw: toNum(cell(rows, r, b + 12)),
     };
   };
   const all = groups[0].map((r) => { const x = rd(r, 0); x.ks = toNum(cell(rows, r, 19)); x.sp = toNum(cell(rows, r, 20)); return x; });
@@ -297,13 +302,34 @@ function parseSeriesByShape(rows) {
 }
 
 function parseSeries(rows) {
-  const all = parseBlock(rows, "종합", { end: "기말평가금액", cost: "투자원금", pl: "투자손익", r: "단순수익률", twr: "시간가중수익률(누적)" });
-  const t = parseBlock(rows, "탱투자", { end: "기말평가금액", cost: "투자원금", pl: "투자손익", r: "투자수익률", twr: "투자수익률(누적)" });
-  const d = parseBlock(rows, "둥투자", { end: "기말평가금액", cost: "투자원금", pl: "투자손익", r: "투자수익률", twr: "투자수익률(누적)" });
+  const all = parseBlock(rows, "종합", { end: "기말평가금액", cost: "투자원금", pl: "투자손익", r: "단순수익률", twr: "시간가중수익률(누적)", mwr: ["금액가중수익률(누적)", "금액가중수익률"], nw: "순자산" });
+  const t = parseBlock(rows, "탱투자", { end: "기말평가금액", cost: "투자원금", pl: "투자손익", r: "투자수익률", twr: "투자수익률(누적)", mwr: ["금액가중수익률(누적)", "금액가중수익률"], nw: "순자산" });
+  const d = parseBlock(rows, "둥투자", { end: "기말평가금액", cost: "투자원금", pl: "투자손익", r: "투자수익률", twr: "투자수익률(누적)", mwr: ["금액가중수익률(누적)", "금액가중수익률"], nw: "순자산" });
   if (!all || !t || !d) return parseSeriesByShape(rows);
   const bm = parseBlock(rows, "수익률 벤치마크", { ks: "KOSPI수익률(누적)", sp: "S&P500수익률(누적)" });
   if (bm) all.forEach((x, i) => { if (bm[i]) { x.ks = bm[i].ks; x.sp = bm[i].sp; } });
   return { all, 탱: t, 둥: d };
+}
+
+/* --- 전세 정규화 ---
+   시트: 전세(임대)보증금 = 내가 넣은 돈, 부채 = 전세 대출
+   앱  : 전세보증금 = 내 돈 + 대출(전체), 부채 = 전세자금대출
+   시트에 이미 전체 금액을 적었다면(보증금 > 대출) 그대로 둔다. */
+function normalizeJeonse(raw) {
+  const d = raw.debt;
+  if (!d || !d.v) return;
+  const dep = raw.asset.filter((a) => a.o === d.o && nz(a.nm).indexOf("전세") >= 0)
+    .sort((a, b) => b.v - a.v)[0];
+  if (!dep) return;
+  if (dep.v < d.v) {
+    console.log("전세 정규화  " + dep.nm + " " + Math.round(dep.v).toLocaleString("ko-KR") +
+      " + 대출 " + Math.round(d.v).toLocaleString("ko-KR") + " → 보증금 전체 " +
+      Math.round(dep.v + d.v).toLocaleString("ko-KR"));
+    dep.v += d.v;
+  }
+  dep.nm = "전세보증금";
+  if (nz(d.nm).indexOf("대출") < 0) d.nm = "전세자금대출";
+  d.t = dep.t || "부동산";
 }
 
 /* --- 시트 → 앱 데이터 --- */
@@ -331,7 +357,7 @@ function buildRaw(G) {
   mark("invest", inv); mark("price", prices);
 
   const as = find(parseAssets, "asset");
-  if (as) { raw.asset = as.asset; raw.debt = as.debt; }
+  if (as) { raw.asset = as.asset; raw.debt = as.debt; normalizeJeonse(raw); }
   mark("asset", as);
 
   const se = find(parseSeries, "series");
@@ -381,17 +407,110 @@ report.forEach((r) => console.log("  " + (r.ok ? "✓" : "✗") + " " + r.label)
 const missing = report.filter((r) => !r.ok);
 if (missing.length) throw new Error("표를 못 찾았습니다: " + missing.map((m) => m.label).join(", "));
 
-/* 검산: 보유 평가액 합계가 계좌 평가액과 맞는지 */
-const invTotal = raw.accounts.reduce((s, a) => {
-  const h = raw.holdings.filter((x) => x[0] === a.id).reduce((t, x) => t + (raw.prices[x[1]] ? raw.prices[x[1]].p * x[3] : 0), 0);
-  return s + h + a.cash;
-}, 0);
+/* ---------- 검산 ---------- */
+const won = (n) => "₩" + Math.round(n).toLocaleString("ko-KR");
+const 계좌평가 = (a) => raw.holdings.filter((x) => x[0] === a.id)
+  .reduce((t, x) => t + (raw.prices[x[1]] ? raw.prices[x[1]].p * x[3] : 0), 0) + a.cash;
+const invTotal = raw.accounts.reduce((s, a) => s + 계좌평가(a), 0);
 const cost = raw.accounts.reduce((s, a) => s + a.cost, 0);
-if (!invTotal || !cost) throw new Error("금액이 비어 있습니다. 시트 구조가 바뀌었는지 확인하세요.");
+const capTotal = raw.asset.reduce((s, a) => s + a.v, 0);
+const errs = [];
+
+if (!invTotal || !cost) errs.push("금액이 비어 있습니다. 시트 구조가 바뀌었는지 확인하세요.");
+
+/* 0) 보유 중인데 시세가 비었거나 오류(#N/A 등)인 종목 — 구글 시세 함수가 가끔 내는 오류 */
+const noPrice = [...new Set(raw.holdings.filter((x) => x[3] > 0 && !(raw.prices[x[1]] && raw.prices[x[1]].p > 0))
+  .map((x) => (raw.prices[x[1]] && raw.prices[x[1]].n) || x[1]))];
+if (noPrice.length) errs.push("시세를 읽지 못한 보유 종목: " + noPrice.join(", ") +
+  " — 시세 함수 오류(#N/A)일 수 있어 이번 회차는 건너뜁니다.");
+
+/* 1) 계좌 수·보유 종목 수가 급감하면 행 누락을 의심 */
+if (raw.accounts.length < 6) errs.push("계좌가 " + raw.accounts.length + "개뿐입니다(기대 6개). 시트 행이 누락됐을 수 있습니다.");
+if (raw.holdings.length < 50) errs.push("보유 종목이 " + raw.holdings.length + "개뿐입니다(기대 60개 내외).");
+raw.accounts.forEach((a) => {
+  if (!a.cost) errs.push(a.o + " " + a.nm + "(" + a.br + ") 원금이 0입니다. 투자요약 블록을 확인하세요.");
+  if (계좌평가(a) <= 0) errs.push(a.o + " " + a.nm + "(" + a.br + ") 평가액이 0입니다.");
+});
+
+/* 2) 자산 시트 요약표(합계행)와 대조 — 가장 확실한 교차검증 */
+const 요약 = (() => {
+  for (const k in G) {
+    const rows = G[k];
+    for (let r = 0; r < rows.length; r++) {
+      const H = colMap(rows[r]);
+      if (H["투자자산"] === undefined || H["자산요약"] === undefined) continue;
+      for (let i = r + 1; i < Math.min(r + 6, rows.length); i++) {
+        const o = nz(cell(rows, i, H["자산요약"]));
+        const inv = toNum(cell(rows, i, H["투자자산"]));
+        if (inv && !o) return {                       // 합계행(대상이 비어 있는 행)
+          inv, gross: H["총자산"] !== undefined ? toNum(cell(rows, i, H["총자산"])) : 0,
+          net: H["순자산"] !== undefined ? toNum(cell(rows, i, H["순자산"])) : 0,
+        };
+      }
+    }
+  }
+  return null;
+})();
+const 계산총자산 = capTotal + invTotal;
+const 계산순자산 = 계산총자산 - (raw.debt ? raw.debt.v : 0);
+if (요약) {
+  const cmp = (nm, calc, sheet) => {
+    if (!sheet) return;
+    const diff = Math.abs(calc - sheet);
+    console.log("교차검증  " + nm.padEnd(4) + " 계산 " + won(calc) + " / 시트 " + won(sheet) +
+      (diff < 2 ? "  ✓" : "  ✗ 차이 " + won(diff)));
+    if (diff >= 2) errs.push(nm + "이 시트 요약과 " + won(diff) + " 어긋납니다." +
+      (nm === "순자산" || nm === "총자산"
+        ? " 전세보증금을 전체 금액(내 돈 + 대출)으로 적었는지, 요약표의 순자산 = 총자산 − 부채 식을 확인하세요."
+        : " 표가 부분적으로만 읽혔을 수 있습니다."));
+  };
+  cmp("투자자산", invTotal, 요약.inv);
+  cmp("총자산", 계산총자산, 요약.gross);
+  cmp("순자산", 계산순자산, 요약.net);
+} else {
+  errs.push("자산 시트 요약표(총자산·순자산·투자자산 합계행)를 읽지 못했습니다. 셀에 오류(#N/A 등)가 있는지 확인하세요.");
+}
+
+/* 3) 시계열 정합성: 종합 = 탱 + 둥 */
+if (raw.series && raw.series.all && raw.series.탱 && raw.series.둥) {
+  const n = raw.series.all.length;
+  if (raw.series.탱.length !== n || raw.series.둥.length !== n) errs.push("시계열 블록의 행 수가 서로 다릅니다.");
+  else {
+    const bad = raw.series.all.filter((x, i) =>
+      Math.abs(x.end - (raw.series.탱[i].end + raw.series.둥[i].end)) > 2).length;
+    if (bad) errs.push("시계열 " + bad + "개 행에서 종합 ≠ 탱+둥 입니다. 블록을 잘못 읽었을 수 있습니다.");
+    ["all", "탱", "둥"].forEach((k) => {
+      if (raw.series[k].every((x) => !x.mwr)) errs.push("시계열(" + (k === "all" ? "종합" : k) + ")의 금액가중수익률(누적)이 비어 있습니다.");
+    });
+    /* 순자산 */
+    const noNw = raw.series.all.filter((x) => !x.nw).length;
+    if (noNw) errs.push("시계열 " + noNw + "개 행에 순자산이 비어 있습니다. '순자산' 열을 확인하세요.");
+    else {
+      const badNw = raw.series.all.filter((x, i) =>
+        Math.abs(x.nw - (raw.series.탱[i].nw + raw.series.둥[i].nw)) > 2).length;
+      if (badNw) errs.push("순자산 " + badNw + "개 행에서 종합 ≠ 탱+둥 입니다.");
+      else {
+        const lastNw = raw.series.all[raw.series.all.length - 1].nw;
+        const gap = Math.abs(lastNw - 계산순자산) / 계산순자산;
+        if (gap > 0.2) errs.push("시계열 최신 순자산(" + won(lastNw) + ")이 현재 순자산(" + won(계산순자산) +
+          ")과 " + Math.round(gap * 100) + "% 벌어집니다. 시계열의 비투자자산에 대출이 이중으로 반영됐는지 확인하세요.");
+        else console.log("순자산 검증  " + raw.series.all.length + "개월 · 최신 " + won(lastNw) + "  ✓");
+      }
+    }
+  }
+}
+
+/* 4) 자본 항목이 비면 자산 시트를 잘못 읽은 것 */
+if (!capTotal) errs.push("자본 항목이 비어 있습니다. 자산 시트를 확인하세요.");
+
+if (errs.length) {
+  console.error("\n검산 실패:");
+  errs.forEach((e) => console.error("  ✗ " + e));
+  throw new Error("데이터가 온전하지 않아 data.json 을 갱신하지 않습니다.");
+}
 
 raw.at = new Date().toISOString();
 fs.writeFileSync(OUT, JSON.stringify(raw));
-const won = (n) => "₩" + Math.round(n).toLocaleString("ko-KR");
 console.log("\n계좌 " + raw.accounts.length + "개 · 보유 " + raw.holdings.length + "종목");
 console.log("투자자산 " + won(invTotal) + " / 원금 " + won(cost));
 console.log("data.json 저장 완료 (" + Math.round(fs.statSync(OUT).size / 1024) + " KB)");
