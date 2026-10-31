@@ -45,7 +45,12 @@ const toNum = (v) => {
   const n = parseFloat(d);
   return isNaN(n) ? 0 : (neg ? -n : n);
 };
-const tk6 = (v) => { const t = nz(v).replace(/\D/g, ""); return t ? t.padStart(6, "0") : ""; };
+/* 종목코드: 숫자만이면 6자리로 0 채움, 영문이 섞인 신규 코드(예: 0085P0)는 그대로 */
+const tk6 = (v) => {
+  const t = nz(v).toUpperCase().replace(/[^0-9A-Z]/g, "");
+  if (!t) return "";
+  return /^\d+$/.test(t) ? t.padStart(6, "0") : t;
+};
 const findHeader = (rows, need) => {
   for (let r = 0; r < rows.length; r++) {
     const set = (rows[r] || []).map(nz);
@@ -120,7 +125,7 @@ function parseInvest(rows) {
       for (let i = 0; i < row.length; i++) { const v = nz(row[i]); if (v === "탱" || v === "둥") { oi = i; break; } }
       if (oi < 0) continue;
       const ti = oi + 5;
-      if (!/^\d{6}$/.test(nz(row[ti]))) continue;
+      if (!/^[0-9A-Z]{6}$/i.test(nz(row[ti]))) continue;
       if (!toNum(row[ti + 2]) || !toNum(row[ti + 5])) continue;
       H = fill({ "대상": oi, "TICKER": ti }, ti);
       hr = r - 1;
