@@ -10,24 +10,25 @@ import {
 
 /* ============================ 디자인 토큰 ============================ */
 const C = {
-  ink: "#F2F5FA",     // 페이지 배경
+  /* 색상 시트 팔레트 (행: 로즈·오렌지·인디고·퍼플·앰버·레드·그레이 / 열: 1~6 단계) */
+  ink: "#FEF3E5",     // 페이지 배경 (앰버 1)
   surf: "#FFFFFF",    // 카드
-  surf2: "#F0F4FA",   // 카드 안쪽 영역
-  line: "#E1E7F0",
-  txt: "#101B2D",
-  mute: "#5A6A85",
-  dim: "#8E9BB0",
+  surf2: "#FBDFE4",   // 카드 안쪽 영역 (로즈 1)
+  line: "#DDDDDD",    // 그레이 1
+  txt: "#2C2C2C",     // 그레이 6
+  mute: "#575757",    // 그레이 4
+  dim: "#9A9A9A",     // 그레이 3
   on: "#FFFFFF",      // 색 채움 위의 글자
-  up: "#E04447",      // 한국 관례: 상승 = 빨강
-  down: "#1F6FE0",    // 하락 = 파랑
-  brass: "#A9761A",   // 금 (글자·강조)
-  violet: "#6A55D8",  // 주식
-  teal: "#12907A",    // 채권
-  steel: "#7C8CA6",   // 현금
-  shadow: "0 1px 2px rgba(16,27,45,0.05), 0 10px 28px -16px rgba(16,27,45,0.18)",
+  up: "#E42313",      // 상승 = 레드 4 (한국 관례)
+  down: "#5C5CA6",    // 하락 = 인디고 4
+  brass: "#DE1A3D",   // 강조 = 로즈 5
+  violet: "#EC5F78",  // 내 포트·주식 = 로즈 4
+  teal: "#733D8B",    // 양호·유지 = 퍼플 4
+  steel: "#9A9A9A",   // 현금·보조선 = 그레이 3
+  shadow: "0 1px 2px rgba(44,44,44,0.05), 0 10px 28px -16px rgba(44,44,44,0.18)",
 };
-const TYPE_COLOR = { 주식: "#7B67E8", 금: "#D19A2E", 채권: "#1BA98F", 현금: "#93A2BA", 부동산: "#3A8FCC" };
-const FIN_COLOR = { 비투자: "#8FA2C0", 투자: "#7B67E8", 부채: "#C6CEDC", 순자산: "#1BA98F" };
+const TYPE_COLOR = { 주식: "#EC5F78", 금: "#F89B20", 채권: "#5C5CA6", 현금: "#9A9A9A", 리츠: "#B281C8", 부동산: "#733D8B" };
+const FIN_COLOR = { 비투자: "#9D9DCA", 투자: "#EC5F78", 부채: "#DDDDDD", 순자산: "#733D8B" };
 const FONT = '-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif';
 const NUM = { fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" };
 
@@ -49,77 +50,107 @@ const sgn = (n) => (n > 0 ? C.up : n < 0 ? C.down : C.mute);
 
 /* ============================ 시세 (한국거래소 시트) ============================ */
 const P_0 = {
-  "360200": { n: "ACE 미국 S&P500", p: 25710, y: 25700, t: "주식", r: "미국" },
-  "379810": { n: "KODEX 미국 나스닥100", p: 26015, y: 26095, t: "주식", r: "미국" },
-  "278530": { n: "KODEX 200TR", p: 39640, y: 40540, t: "주식", r: "한국" },
-  "283580": { n: "KODEX 차이나 CSI300", p: 14640, y: 14680, t: "주식", r: "중국" },
-  "241180": { n: "TIGER 일본 니케이225", p: 33660, y: 34250, t: "주식", r: "일본" },
-  "453810": { n: "KODEX 인도 Nifty50", p: 10990, y: 11035, t: "주식", r: "인도" },
-  "308620": { n: "KODEX 미국 10년국채선물", p: 11070, y: 11095, t: "채권", r: "미국" },
-  "476760": { n: "ACE 미국 30년국채액티브", p: 8580, y: 8615, t: "채권", r: "미국" },
-  "468380": { n: "KODEX iShares 미국 하이일드", p: 10555, y: 10560, t: "채권", r: "미국" },
-  "385560": { n: "RISE KIS 국고채30년", p: 49235, y: 49790, t: "채권", r: "한국" },
-  "411060": { n: "ACE KRX 금현물", p: 26490, y: 26800, t: "금", r: "기타" },
-  "456880": { n: "ACE 미국달러 SOFR금리", p: 11835, y: 11775, t: "현금", r: "미국" },
-  "357870": { n: "TIGER CD금리 KIS", p: 58050, y: 58045, t: "현금", r: "한국" },
-  "005930": { n: "삼성전자", p: 259500, y: 269000, t: "주식", r: "한국" },
-  "000660": { n: "SK하이닉스", p: 1812000, y: 1853000, t: "주식", r: "한국" },
-  "353200": { n: "대덕전자", p: 100000, y: 102500, t: "주식", r: "한국" },
-  "104530": { n: "KIWOOM 코리아 고배당", p: 17610, y: 17695, t: "주식", r: "한국" },
+  "104530": { n: "KIWOOM 코리아 고배당", p: 16075, y: 16230, t: "주식", r: "한국" },
+  "133690": { n: "TIGER 미국나스닥100", p: 170475, y: 174450, t: "주식", r: "미국" },
+  "157450": { n: "TIGER 단기통안채", p: 113085, y: 113070, t: "현금", r: "한국" },
+  "241180": { n: "TIGER 일본 니케이225", p: 32410, y: 33150, t: "주식", r: "일본" },
+  "278530": { n: "KODEX 200TR", p: 32960, y: 34235, t: "주식", r: "한국" },
+  "283580": { n: "KODEX 차이나 CSI300", p: 12875, y: 13075, t: "주식", r: "중국" },
+  "294400": { n: "KIWOOM 200TR", p: 119385, y: 124170, t: "주식", r: "한국" },
+  "308620": { n: "KODEX 미국10년국채선물", p: 11050, y: 11015, t: "채권", r: "미국" },
+  "352560": { n: "KODEX 미국 부동산리츠(H)", p: 11940, y: 11645, t: "리츠", r: "미국" },
+  "353200": { n: "대덕전자", p: 119400, y: 138200, t: "주식", r: "한국" },
+  "357870": { n: "TIGER CD금리 KIS(합성)", p: 58305, y: 58300, t: "현금", r: "한국" },
+  "360200": { n: "ACE 미국 S&P500", p: 25595, y: 25860, t: "주식", r: "미국" },
+  "365780": { n: "ACE 국고채10년", p: 85205, y: 84660, t: "채권", r: "한국" },
+  "379810": { n: "KODEX 미국 나스닥100", p: 25465, y: 26060, t: "주식", r: "미국" },
+  "385560": { n: "RISE KIS 국고채30년", p: 56160, y: 54960, t: "채권", r: "한국" },
+  "402970": { n: "ACE 미국 배당다우존스", p: 15450, y: 15195, t: "주식", r: "미국" },
+  "411060": { n: "ACE KRX금현물", p: 23840, y: 24080, t: "금", r: "기타" },
+  "449170": { n: "TIGER KOFR 금리액티브(합성)", p: 112310, y: 112295, t: "현금", r: "한국" },
+  "453810": { n: "KODEX 인도 Nifty50", p: 10810, y: 10675, t: "주식", r: "인도" },
+  "456880": { n: "ACE 미국달러 SOFR금리(합)", p: 11795, y: 11820, t: "현금", r: "미국" },
+  "458730": { n: "TIGER 미국 배당다우존스", p: 15175, y: 14955, t: "주식", r: "미국" },
+  "468380": { n: "KODEX iShares 미국하이일드", p: 10285, y: 10295, t: "채권", r: "미국" },
+  "471230": { n: "KODEX 국고채10년액티브", p: 107195, y: 106565, t: "채권", r: "한국" },
+  "476760": { n: "ACE 미국 30년국채액티브", p: 8590, y: 8545, t: "채권", r: "미국" },
+  "0085P0": { n: "ACE 미국 10년국채액티브", p: 9390, y: 9345, t: "채권", r: "미국" },
+  "000660": { n: "SK하이닉스", p: 1418000, y: 1526000, t: "주식", r: "한국" },
+  "005930": { n: "삼성전자", p: 225000, y: 232000, t: "주식", r: "한국" },
 };
 
 /* ============================ 계좌 ============================ */
 const ACCT_0 = [
-  { id: "t-ps", o: "탱", nm: "연금저축", br: "삼성증권", cash: 2997, cost: 12000000, liq: false },
-  { id: "t-pp", o: "탱", nm: "연금저축", br: "프리즘", cash: 5790, cost: 5000000, liq: false },
-  { id: "t-isa", o: "탱", nm: "ISA", br: "KB증권", cash: 164879, cost: 31500000, liq: true },
-  { id: "d-ps", o: "둥", nm: "연금저축", br: "삼성증권", cash: 179296, cost: 14607784, liq: false },
-  { id: "d-isa", o: "둥", nm: "ISA", br: "하나증권", cash: 210, cost: 55000000, liq: true },
-  { id: "d-tr", o: "둥", nm: "위탁", br: "하나증권", cash: 25060, cost: 1422248, liq: true },
+  { id: "t-ps", o: "탱", nm: "연금저축", br: "삼성증권", cash: 58940, cost: 12000000, liq: false },
+  { id: "t-pp", o: "탱", nm: "연금저축", br: "프리즘", cash: 14909, cost: 5000000, liq: false },
+  { id: "t-isa", o: "탱", nm: "ISA", br: "KB증권", cash: 174807, cost: 32650000, liq: true },
+  { id: "d-ps", o: "둥", nm: "연금저축", br: "삼성증권", cash: 3707, cost: 14607784, liq: false },
+  { id: "d-isa", o: "둥", nm: "ISA", br: "하나증권", cash: 3585, cost: 55000000, liq: true },
+  { id: "d-tr", o: "둥", nm: "위탁", br: "하나증권", cash: 12530, cost: 1422248, liq: true },
 ];
 
 /* 보유: [계좌, 티커, 평단가, 수량, 목표비중%] */
 const HOLD_0 = [
-  ["t-ps", "360200", 19559, 78, 13], ["t-ps", "379810", 21325, 48, 8],
-  ["t-ps", "278530", 29340, 20, 5], ["t-ps", "283580", 14314, 42, 4],
-  ["t-ps", "241180", 26762, 18, 4], ["t-ps", "453810", 12852, 68, 5],
-  ["t-ps", "308620", 11815, 42, 3], ["t-ps", "476760", 9822, 36, 2],
-  ["t-ps", "468380", 11524, 29, 2], ["t-ps", "385560", 68299, 46, 15],
-  ["t-ps", "411060", 21872, 132, 22], ["t-ps", "456880", 12276, 40, 3],
-  ["t-ps", "357870", 56791, 39, 14],
-
-  ["t-pp", "360200", 18614, 37, 13], ["t-pp", "379810", 19621, 21, 8],
-  ["t-pp", "278530", 15350, 9, 5], ["t-pp", "283580", 12388, 16, 4],
-  ["t-pp", "241180", 21093, 8, 4], ["t-pp", "453810", 13070, 32, 5],
-  ["t-pp", "308620", 11608, 22, 3], ["t-pp", "476760", 9491, 15, 2],
-  ["t-pp", "468380", 11354, 13, 2], ["t-pp", "385560", 72432, 22, 15],
-  ["t-pp", "411060", 20822, 61, 22], ["t-pp", "456880", 11872, 15, 3],
-  ["t-pp", "357870", 56030, 19, 14],
-
-  ["t-isa", "360200", 23178, 161, 20], ["t-isa", "379810", 24467, 102, 20],
-  ["t-isa", "278530", 28913, 42, 0], ["t-isa", "283580", 0, 0, 0],
-  ["t-isa", "241180", 0, 0, 0], ["t-isa", "453810", 0, 0, 0],
-  ["t-isa", "411060", 26248, 36, 20], ["t-isa", "456880", 0, 0, 10],
-  ["t-isa", "357870", 0, 0, 0],
-  ["t-isa", "000660", 2178111, 9, 15], ["t-isa", "005930", 302118, 15, 15],
-  ["t-isa", "353200", 174100, 5, 0],
-
-  ["d-ps", "360200", 19795, 100, 13], ["d-ps", "379810", 21661, 60, 8],
-  ["d-ps", "278530", 23634, 24, 5], ["d-ps", "283580", 13077, 54, 4],
-  ["d-ps", "241180", 23110, 22, 4], ["d-ps", "453810", 13597, 88, 5],
-  ["d-ps", "308620", 11591, 53, 3], ["d-ps", "476760", 9750, 46, 2],
-  ["d-ps", "468380", 11365, 37, 2], ["d-ps", "385560", 72680, 59, 15],
-  ["d-ps", "411060", 20366, 164, 22], ["d-ps", "456880", 11969, 50, 3],
-  ["d-ps", "357870", 56339, 48, 14],
-
-  ["d-isa", "360200", 22954, 290, 20], ["d-isa", "379810", 23435, 153, 20],
-  ["d-isa", "278530", 20554, 76, 0], ["d-isa", "283580", 13428, 111, 0],
-  ["d-isa", "241180", 24519, 70, 0], ["d-isa", "453810", 13508, 103, 0],
-  ["d-isa", "411060", 26120, 489, 20], ["d-isa", "456880", 12266, 50, 10],
-  ["d-isa", "357870", 56032, 39, 0], ["d-isa", "005930", 205792, 30, 15],
-  ["d-isa", "000660", 2184444, 9, 15], ["d-isa", "353200", 157613, 15, 0],
-
-  ["d-tr", "104530", 7687, 185, 0],
+  ["t-ps",  "360200",  19559,  78,  7], ["t-ps",  "379810",  21325,  48,  0],
+  ["t-ps",  "133690",  0,  0,  5], ["t-ps",  "458730",  0,  0,  2],
+  ["t-ps",  "402970",  0,  0,  2], ["t-ps",  "278530",  29340,  20,  6],
+  ["t-ps",  "294400",  0,  0,  2], ["t-ps",  "283580",  14314,  42,  4],
+  ["t-ps",  "241180",  26762,  18,  4], ["t-ps",  "453810",  12852,  68,  4],
+  ["t-ps",  "308620",  11815,  42,  4], ["t-ps",  "0085P0",  0,  0,  4],
+  ["t-ps",  "476760",  9822,  36,  4], ["t-ps",  "468380",  11524,  29,  5],
+  ["t-ps",  "471230",  0,  0,  5], ["t-ps",  "365780",  0,  0,  5],
+  ["t-ps",  "385560",  68299,  46,  10], ["t-ps",  "411060",  21872,  132,  13],
+  ["t-ps",  "352560",  0,  0,  4], ["t-ps",  "456880",  12276,  40,  0],
+  ["t-ps",  "357870",  56791,  39,  0], ["t-ps",  "157450",  0,  0,  5],
+  ["t-ps",  "449170",  0,  0,  5], ["t-pp",  "360200",  18614,  19,  7],
+  ["t-pp",  "133690",  177265,  2,  5], ["t-pp",  "458730",  14450,  10,  2],
+  ["t-pp",  "402970",  14705,  10,  2], ["t-pp",  "278530",  19444,  12,  6],
+  ["t-pp",  "294400",  114840,  1,  2], ["t-pp",  "283580",  12754,  24,  4],
+  ["t-pp",  "241180",  23550,  10,  4], ["t-pp",  "453810",  13070,  25,  4],
+  ["t-pp",  "308620",  11500,  27,  4], ["t-pp",  "0085P0",  9375,  32,  4],
+  ["t-pp",  "476760",  8986,  30,  4], ["t-pp",  "468380",  10709,  37,  5],
+  ["t-pp",  "471230",  105560,  3,  5], ["t-pp",  "365780",  83935,  4,  5],
+  ["t-pp",  "385560",  72432,  13,  10], ["t-pp",  "411060",  20822,  37,  13],
+  ["t-pp",  "352560",  11590,  26,  4], ["t-pp",  "157450",  112965,  3,  5],
+  ["t-pp",  "449170",  112165,  4,  5], ["t-isa",  "360200",  23178,  161,  7],
+  ["t-isa",  "379810",  24467,  102,  0], ["t-isa",  "133690",  0,  0,  5],
+  ["t-isa",  "458730",  0,  0,  2], ["t-isa",  "402970",  0,  0,  2],
+  ["t-isa",  "278530",  28913,  42,  0], ["t-isa",  "294400",  0,  0,  0],
+  ["t-isa",  "283580",  0,  0,  0], ["t-isa",  "241180",  0,  0,  0],
+  ["t-isa",  "453810",  0,  0,  0], ["t-isa",  "308620",  0,  0,  4],
+  ["t-isa",  "0085P0",  0,  0,  4], ["t-isa",  "476760",  0,  0,  4],
+  ["t-isa",  "468380",  0,  0,  5], ["t-isa",  "471230",  0,  0,  5],
+  ["t-isa",  "365780",  0,  0,  5], ["t-isa",  "385560",  0,  0,  0],
+  ["t-isa",  "411060",  26248,  36,  13], ["t-isa",  "352560",  0,  0,  4],
+  ["t-isa",  "456880",  0,  0,  0], ["t-isa",  "357870",  0,  0,  0],
+  ["t-isa",  "157450",  0,  0,  5], ["t-isa",  "449170",  0,  0,  5],
+  ["t-isa",  "000660",  2178111,  9,  15], ["t-isa",  "005930",  302118,  15,  15],
+  ["t-isa",  "353200",  174100,  5,  0], ["d-ps",  "360200",  19795,  100,  7],
+  ["d-ps",  "379810",  21661,  60,  0], ["d-ps",  "133690",  0,  0,  5],
+  ["d-ps",  "458730",  0,  0,  2], ["d-ps",  "402970",  0,  0,  2],
+  ["d-ps",  "278530",  23634,  24,  6], ["d-ps",  "294400",  0,  0,  2],
+  ["d-ps",  "283580",  13077,  54,  4], ["d-ps",  "241180",  23110,  22,  4],
+  ["d-ps",  "453810",  13597,  88,  4], ["d-ps",  "308620",  11591,  53,  4],
+  ["d-ps",  "0085P0",  0,  0,  4], ["d-ps",  "476760",  9750,  46,  4],
+  ["d-ps",  "468380",  11365,  37,  5], ["d-ps",  "471230",  0,  0,  5],
+  ["d-ps",  "365780",  0,  0,  5], ["d-ps",  "385560",  72680,  59,  10],
+  ["d-ps",  "411060",  20366,  164,  13], ["d-ps",  "352560",  0,  0,  4],
+  ["d-ps",  "456880",  11969,  50,  0], ["d-ps",  "357870",  56339,  48,  0],
+  ["d-ps",  "157450",  0,  0,  5], ["d-ps",  "449170",  0,  0,  5],
+  ["d-isa",  "360200",  22954,  290,  7], ["d-isa",  "379810",  23435,  153,  0],
+  ["d-isa",  "133690",  0,  0,  5], ["d-isa",  "458730",  0,  0,  2],
+  ["d-isa",  "402970",  0,  0,  2], ["d-isa",  "278530",  20554,  76,  0],
+  ["d-isa",  "294400",  0,  0,  0], ["d-isa",  "283580",  13428,  111,  0],
+  ["d-isa",  "241180",  24519,  70,  0], ["d-isa",  "453810",  13508,  103,  0],
+  ["d-isa",  "308620",  0,  0,  4], ["d-isa",  "0085P0",  0,  0,  4],
+  ["d-isa",  "476760",  0,  0,  4], ["d-isa",  "468380",  0,  0,  5],
+  ["d-isa",  "471230",  0,  0,  5], ["d-isa",  "365780",  0,  0,  5],
+  ["d-isa",  "385560",  0,  0,  0], ["d-isa",  "411060",  26120,  489,  13],
+  ["d-isa",  "352560",  0,  0,  4], ["d-isa",  "456880",  12266,  50,  0],
+  ["d-isa",  "357870",  56032,  39,  0], ["d-isa",  "157450",  0,  0,  5],
+  ["d-isa",  "449170",  0,  0,  5], ["d-isa",  "005930",  205792,  30,  15],
+  ["d-isa",  "000660",  2184444,  9,  15], ["d-isa",  "353200",  157613,  15,  0],
+  ["d-tr",  "104530",  7687,  185,  0],
 ];
 
 /* ============================ 투자 외 자산 (자산 시트) ============================ */
@@ -127,56 +158,60 @@ const ASSET_0 = [
   { o: "탱", k: "비투자", t: "현금", nm: "주택청약", v: 9730000, liq: false },
   { o: "탱", k: "비투자", t: "부동산", nm: "전세보증금", v: 234400000, liq: true },
   { o: "탱", k: "비투자", t: "현금", nm: "퇴직급여", v: 41000000, liq: true },
+  { o: "탱", k: "비투자", t: "현금", nm: "현금", v: 0, liq: true },
   { o: "둥", k: "비투자", t: "현금", nm: "주택청약", v: 250000, liq: false },
+  { o: "둥", k: "비투자", t: "현금", nm: "청미적", v: 1000000, liq: true },
   { o: "둥", k: "비투자", t: "부동산", nm: "분양계약금", v: 51000000, liq: true },
-  { o: "둥", k: "비투자", t: "금", nm: "금 현물", v: 4206544, liq: true },
+  { o: "둥", k: "비투자", t: "금", nm: "금", v: 4020940, liq: true },
   { o: "둥", k: "비투자", t: "현금", nm: "현금", v: 0, liq: true },
-  { o: "둥", k: "비투자", t: "현금", nm: "청미적", v: 500000, liq: true },
 ];
 const DEBT_0 = { o: "탱", nm: "전세자금대출", t: "부동산", v: 187500000 };
 
 
 /* ============================ 시장 지표 (종합 시트) ============================ */
 const MARKET_0 = [
-  { nm: "KOSPI", v: 6910, hi: 9386, lo: 3312, d: 0 },
-  { nm: "S&P 500", v: 7657, hi: 7817, lo: 6317, d: 0 },
-  { nm: "NASDAQ", v: 26333, hi: 27190, lo: 20690, d: 0 },
-  { nm: "달러인덱스", v: 99, hi: 102, lo: 96, d: 0 },
-  { nm: "원/달러", v: 1341, hi: 1558, lo: 1345, d: 0 },
-  { nm: "원/엔(100)", v: 882, hi: 971, lo: 855, d: 0 },
+  { nm: "KOSPI", v: 5731, hi: 9386, lo: 3833 },
+  { nm: "S&P", v: 7580, hi: 7845, lo: 6317 },
+  { nm: "NASDAQ", v: 25437, hi: 27723, lo: 20690 },
+  { nm: "달러인덱스", v: 102, hi: 103, lo: 96 },
+  { nm: "환율(원/달러)", v: 1334, hi: 1558, lo: 1322 },
+  { nm: "환율(원/엔)", v: 847, hi: 971, lo: 836 },
 ];
 
 /* ============================ 수익률 시계열 ============================ */
 const SERIES_0 = {
   all: [
-    { m: "1월", end: 147559862, cost: 118030032, pl: 8762373, r: 6.31, twr: 6.31, ks: 23.97, sp: 1.37 , mwr: 7.38, nw: 306151346 },
-    { m: "2월", end: 146092603, cost: 114030032, pl: 2532741, r: 1.76, twr: 8.19, ks: 48.17, sp: 0.49 , mwr: 8.8, nw: 305329635 },
-    { m: "3월", end: 143221472, cost: 118030032, pl: -6871131, r: -4.58, twr: 3.24, ks: 19.89, sp: -4.63 , mwr: 3.39, nw: 304265072 },
-    { m: "4월", end: 149201551, cost: 118030032, pl: 5980079, r: 4.18, twr: 7.55, ks: 56.59, sp: 5.31 , mwr: 7.85, nw: 310551551 },
-    { m: "5월", end: 157255340, cost: 118030032, pl: 8053789, r: 5.40, twr: 13.35, ks: 101.13, sp: 10.73 , mwr: 13.79, nw: 321137280 },
-    { m: "6월", end: 157512229, cost: 118530032, pl: -3743111, r: -2.32, twr: 10.72, ks: 101.14, sp: 9.55 , mwr: 10.93, nw: 322237253 },
-    { m: "7월", end: 138194766, cost: 118530032, pl: -19317463, r: -12.26, twr: -2.86, ks: 56.51, sp: 9.41 , mwr: -3.39, nw: 290677030 },
-    { m: "8월", end: 137514968, cost: 119530032, pl: 80202, r: 0.06, twr: -2.80, ks: 61.84, sp: 12.28 , mwr: -3.31, nw: 290601912 },
+    { m: "1월", end: 147559862, cost: 118030032, pl: 8762373, r: 6.31, twr: 6.31, mwr: 7.38, nw: 306151346, ks: 23.97, sp: 1.37 },
+    { m: "2월", end: 146092603, cost: 114030032, pl: 2532741, r: 1.76, twr: 8.19, mwr: 8.8, nw: 305329635, ks: 48.17, sp: 0.49 },
+    { m: "3월", end: 143221472, cost: 118030032, pl: -6871131, r: -4.58, twr: 3.24, mwr: 3.39, nw: 304265072, ks: 19.89, sp: -4.63 },
+    { m: "4월", end: 149201551, cost: 118030032, pl: 5980079, r: 4.18, twr: 7.55, mwr: 7.85, nw: 310551551, ks: 56.59, sp: 5.31 },
+    { m: "5월", end: 157255340, cost: 118030032, pl: 8053789, r: 5.4, twr: 13.35, mwr: 13.79, nw: 321137280, ks: 101.13, sp: 10.73 },
+    { m: "6월", end: 157512229, cost: 118530032, pl: -3743111, r: -2.32, twr: 10.72, mwr: 10.93, nw: 322237253, ks: 101.14, sp: 9.55 },
+    { m: "7월", end: 138194766, cost: 118530032, pl: -19317463, r: -12.26, twr: -2.86, mwr: -3.39, nw: 290677030, ks: 56.51, sp: 9.41 },
+    { m: "8월", end: 137514968, cost: 119530032, pl: 80202, r: 0.06, twr: -2.8, mwr: -3.31, nw: 290601912, ks: 61.84, sp: 12.28 },
+    { m: "9월", end: 137990700, cost: 119530032, pl: 475732, r: 0.35, twr: -2.47, mwr: -2.95, nw: 291077644, ks: 62.26, sp: 11.77 },
   ],
   탱: [
-    { m: "1월", end: 58665556, cost: 47000000, pl: 2987803, r: 5.37, twr: 5.37 , mwr: 6.54, nw: 152295556 },
-    { m: "2월", end: 58914252, cost: 47000000, pl: 248696, r: 0.42, twr: 5.81 , mwr: 6.42, nw: 152544252 },
-    { m: "3월", end: 56322324, cost: 47000000, pl: -2591928, r: -4.40, twr: 1.16 , mwr: 1.23, nw: 150952324 },
-    { m: "4월", end: 58321890, cost: 47000000, pl: 1999566, r: 3.55, twr: 4.75 , mwr: 4.98, nw: 152951890 },
-    { m: "5월", end: 60828417, cost: 47000000, pl: 2506527, r: 4.30, twr: 9.25 , mwr: 9.61, nw: 157458417 },
-    { m: "6월", end: 60936458, cost: 47500000, pl: -391959, r: -0.64, twr: 8.55 , mwr: 8.82, nw: 158066458 },
-    { m: "7월", end: 51894048, cost: 47500000, pl: -9042410, r: -14.84, twr: -7.56 , mwr: -7.89, nw: 149024048 },
-    { m: "8월", end: 52836135, cost: 48500000, pl: -57913, r: -0.11, twr: -7.66 , mwr: -7.96, nw: 149966135 },
+    { m: "1월", end: 58665556, cost: 47000000, pl: 2987803, r: 5.37, twr: 5.37, mwr: 6.54, nw: 152295556 },
+    { m: "2월", end: 58914252, cost: 47000000, pl: 248696, r: 0.42, twr: 5.81, mwr: 6.42, nw: 152544252 },
+    { m: "3월", end: 56322324, cost: 47000000, pl: -2591928, r: -4.4, twr: 1.16, mwr: 1.23, nw: 150952324 },
+    { m: "4월", end: 58321890, cost: 47000000, pl: 1999566, r: 3.55, twr: 4.75, mwr: 4.98, nw: 152951890 },
+    { m: "5월", end: 60828417, cost: 47000000, pl: 2506527, r: 4.3, twr: 9.25, mwr: 9.61, nw: 157458417 },
+    { m: "6월", end: 60936458, cost: 47500000, pl: -391959, r: -0.64, twr: 8.55, mwr: 8.82, nw: 158066458 },
+    { m: "7월", end: 51894048, cost: 47500000, pl: -9042410, r: -14.84, twr: -7.56, mwr: -7.89, nw: 149024048 },
+    { m: "8월", end: 52836135, cost: 48500000, pl: -57913, r: -0.11, twr: -7.66, mwr: -7.96, nw: 149966135 },
+    { m: "9월", end: 53420120, cost: 48500000, pl: 583985, r: 1.11, twr: -6.64, mwr: -6.85, nw: 150550120 },
   ],
   둥: [
-    { m: "1월", end: 88894306, cost: 71030032, pl: 5774570, r: 6.95, twr: 6.95 , mwr: 7.9, nw: 153855790 },
-    { m: "2월", end: 87178351, cost: 67030032, pl: 2284045, r: 2.69, twr: 9.82 , mwr: 10.35, nw: 152785383 },
-    { m: "3월", end: 86899148, cost: 71030032, pl: -4279203, r: -4.69, twr: 4.67 , mwr: 4.83, nw: 153312748 },
-    { m: "4월", end: 90879661, cost: 71030032, pl: 3980513, r: 4.58, twr: 9.46 , mwr: 9.76, nw: 157599661 },
-    { m: "5월", end: 96426923, cost: 71030032, pl: 5547262, r: 6.10, twr: 16.15 , mwr: 16.58, nw: 163678863 },
-    { m: "6월", end: 96575771, cost: 71030032, pl: -3351152, r: -3.35, twr: 12.25 , mwr: 12.33, nw: 164170795 },
-    { m: "7월", end: 86300718, cost: 71030032, pl: -10275053, r: -10.64, twr: 0.31 , mwr: -0.39, nw: 141652982 },
-    { m: "8월", end: 84678833, cost: 71030032, pl: 138115, r: 0.16, twr: 0.47 , mwr: -0.22, nw: 140635777 },
+    { m: "1월", end: 88894306, cost: 71030032, pl: 5774570, r: 6.95, twr: 6.95, mwr: 7.9, nw: 153855790 },
+    { m: "2월", end: 87178351, cost: 67030032, pl: 2284045, r: 2.69, twr: 9.82, mwr: 10.35, nw: 152785383 },
+    { m: "3월", end: 86899148, cost: 71030032, pl: -4279203, r: -4.69, twr: 4.67, mwr: 4.83, nw: 153312748 },
+    { m: "4월", end: 90879661, cost: 71030032, pl: 3980513, r: 4.58, twr: 9.46, mwr: 9.76, nw: 157599661 },
+    { m: "5월", end: 96426923, cost: 71030032, pl: 5547262, r: 6.1, twr: 16.15, mwr: 16.58, nw: 163678863 },
+    { m: "6월", end: 96575771, cost: 71030032, pl: -3351152, r: -3.35, twr: 12.25, mwr: 12.33, nw: 164170795 },
+    { m: "7월", end: 86300718, cost: 71030032, pl: -10275053, r: -10.64, twr: 0.31, mwr: -0.39, nw: 141652982 },
+    { m: "8월", end: 84678833, cost: 71030032, pl: 138115, r: 0.16, twr: 0.47, mwr: -0.22, nw: 140635777 },
+    { m: "9월", end: 84570580, cost: 71030032, pl: -108253, r: -0.13, twr: 0.34, mwr: -0.35, nw: 140527524 },
   ],
 };
 
@@ -231,7 +266,18 @@ const RE = {
     { k: "낙관", v2032: 790000000, gain: 290000000, after: 203000000, withInt: 250097870, net: -39902130, avail: 1053000000 },
   ],
 };
-const SEV = { pay: 42764000, avg: 4656667, days: 3353, inDate: "2017.06.07", outDate: "2026.08.11", salary: 53000000 };
+/* 퇴직급여(간이) — 자산 시트 계산식과 동일: 오늘 퇴사 가정
+   월급여 = (연봉 − 휴가비) ÷ 12, 평균임금 = 월급여 + 식대 + 휴가비/12 + 직책수당
+   근속일수 = 오늘 − 입사일 + 1, 퇴직급여 = 평균임금 × 근속일수 ÷ 365 (천원 미만 절사) */
+const SEV_IN = { salary: 53000000, vacation: 800000, meal: 12000 * 20, duty: 0, inDate: [2017, 6, 7] };
+function sevCalc() {
+  const [y, m, d] = seoulYMD(new Date()).map(Number);
+  const days = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(SEV_IN.inDate[0], SEV_IN.inDate[1] - 1, SEV_IN.inDate[2])) / 864e5) + 1;
+  const avg = (SEV_IN.salary - SEV_IN.vacation) / 12 + SEV_IN.meal + SEV_IN.vacation / 12 + SEV_IN.duty;
+  const pay = Math.floor((avg * days) / 365 / 1000) * 1000;
+  const p2 = (n) => String(n).padStart(2, "0");
+  return { pay, avg, days, inDate: SEV_IN.inDate[0] + "." + p2(SEV_IN.inDate[1]) + "." + p2(SEV_IN.inDate[2]), outDate: y + "." + p2(m) + "." + p2(d) };
+}
 
 /* ============================ 파생 계산 ============================ */
 function buildAccounts() {
@@ -302,12 +348,12 @@ function rebuild(raw) {
   INV_TOTAL = ACCOUNTS.reduce((s, a) => s + a.total, 0);
   INV_COST = ACCOUNTS.reduce((s, a) => s + a.cost, 0);
 
-  const tm = { 주식: 0, 금: 0, 채권: 0, 현금: 0 };
+  const tm = { 주식: 0, 채권: 0, 금: 0, 리츠: 0, 현금: 0 };
   ACCOUNTS.forEach((a) => {
     a.items.forEach((i) => { tm[i.t] = (tm[i.t] || 0) + i.val; });
     tm["현금"] += a.cash;
   });
-  TYPE_MIX = Object.entries(tm).map(([k, v]) => ({ name: k, value: v, pctv: INV_TOTAL ? (v / INV_TOTAL) * 100 : 0 }));
+  TYPE_MIX = Object.entries(tm).filter(([k, v]) => v || k !== "리츠").map(([k, v]) => ({ name: k, value: v, pctv: INV_TOTAL ? (v / INV_TOTAL) * 100 : 0 }));
 
   const rm = {};
   ACCOUNTS.forEach((a) => a.items.forEach((i) => { if (i.t === "주식" && i.val) rm[i.r] = (rm[i.r] || 0) + i.val; }));
@@ -357,7 +403,7 @@ rebuild(DEFAULT_RAW);
 
 /* ============================ 데이터 불러오기 ============================ */
 /* 앱 옆에 있는 data.json 을 그대로 읽습니다. 파일은 GitHub Actions 가 만들어 둡니다. */
-const SNAPSHOT_AT = "2026-09-13T09:00:00+09:00";   /* 내장 데이터의 기준 시각 */
+const SNAPSHOT_AT = "2026-10-31T17:00:00+09:00";   /* 내장 데이터의 기준 시각 */
 let SYNC = { at: null, src: "내장", err: "" };
 
 /* 화면 좌측 상단 · 수익률 탭에 쓰는 기준일 */
@@ -414,7 +460,7 @@ function Eyebrow({ children, right }) {
 function Pill({ children, color = C.mute, bg }) {
   return (
     <span style={{
-      fontSize: 11, fontWeight: 700, color, background: bg || "rgba(16,27,45,0.06)",
+      fontSize: 11, fontWeight: 700, color, background: bg || "rgba(44,44,44,0.06)",
       padding: "3px 8px", borderRadius: 999, whiteSpace: "nowrap",
     }}>{children}</span>
   );
@@ -426,7 +472,7 @@ function Delta({ v, d = 2, size = 12 }) {
 function WeightTrack({ now, tgt, color }) {
   const max = Math.max(now, tgt, 1) * 1.15;
   return (
-    <div style={{ position: "relative", height: 6, borderRadius: 3, background: "rgba(16,27,45,0.08)" }}>
+    <div style={{ position: "relative", height: 6, borderRadius: 3, background: "rgba(44,44,44,0.08)" }}>
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: (now / max) * 100 + "%", background: color, borderRadius: 3, opacity: 0.85 }} />
       <div style={{ position: "absolute", left: (tgt / max) * 100 + "%", top: -3, bottom: -3, width: 2, background: C.txt, borderRadius: 1 }} />
     </div>
@@ -438,8 +484,8 @@ function GapGauge({ gap, thr }) {
   const w = (capped / (thr * 2.5)) * 100;
   const over = gap >= thr;
   return (
-    <div style={{ position: "relative", height: 4, borderRadius: 2, background: "rgba(16,27,45,0.05)" }}>
-      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 40 + "%", background: "rgba(18,144,122,0.18)" }} />
+    <div style={{ position: "relative", height: 4, borderRadius: 2, background: "rgba(44,44,44,0.05)" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 40 + "%", background: "rgba(115,61,139,0.18)" }} />
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: w + "%", background: over ? C.brass : C.dim, borderRadius: 2 }} />
     </div>
   );
@@ -531,7 +577,7 @@ function Home_({ go }) {
   return (
     <div className="flex flex-col" style={{ gap: 12 }}>
       {/* 1. 재무상태 */}
-      <Card style={{ background: "linear-gradient(160deg,#E8EFFB 0%,#FFFFFF 62%)" }}>
+      <Card style={{ background: "linear-gradient(160deg,#DEDEED 0%,#FFFFFF 62%)" }}>
         <Eyebrow right={<Pill color={C.mute}>총자산 = 부채 + 자본</Pill>}>재무상태</Eyebrow>
         <div style={{ fontSize: 10.5, color: C.dim }}>총자산</div>
         <Amt v={FIN.gross} size={28} weight={800} color={C.txt} />
@@ -608,7 +654,7 @@ function Home_({ go }) {
                   </span>
                 </div>
                 <div className="flex items-center" style={{ gap: 8 }}>
-                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(16,27,45,0.08)" }}>
+                  <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(44,44,44,0.08)" }}>
                     <div style={{ height: 4, borderRadius: 2, width: Math.max(0, e.pctv) + "%", background: TYPE_COLOR[e.name], opacity: 0.75 }} />
                   </div>
                   <Amt v={e.value} k size={10} weight={600} color={C.dim} />
@@ -638,7 +684,7 @@ function Home_({ go }) {
 
       {/* 3. 부동산 가용자산 */}
       <Card>
-        <Eyebrow right={<Pill color={C.brass} bg="rgba(209,154,46,0.16)">
+        <Eyebrow right={<Pill color={C.brass} bg="rgba(222,26,61,0.10)">
           순자산의 {nf((AVAIL.total / FIN.net) * 100, 0)}%
         </Pill>}>부동산 가용자산</Eyebrow>
         <Amt v={AVAIL.total} size={26} weight={800} color={C.txt} />
@@ -729,7 +775,7 @@ function Home_({ go }) {
                   <span style={{ fontSize: 11, color: C.mute }}>{m.nm}</span>
                   <span style={{ ...NUM, fontSize: 13, fontWeight: 700, color: C.txt }}>{nf(m.v)}</span>
                 </div>
-                <div style={{ position: "relative", height: 3, background: "rgba(16,27,45,0.09)", borderRadius: 2, marginTop: 6 }}>
+                <div style={{ position: "relative", height: 3, background: "rgba(44,44,44,0.09)", borderRadius: 2, marginTop: 6 }}>
                   <div style={{ position: "absolute", left: pos + "%", top: -3, width: 3, height: 9, background: C.brass, borderRadius: 2 }} />
                 </div>
                 <div className="flex justify-between" style={{ ...NUM, fontSize: 9, color: C.dim, marginTop: 3 }}>
@@ -851,7 +897,7 @@ function Assets() {
             </div>
             <div className="flex items-center justify-between" style={{ marginTop: 10 }}>
               <div className="flex" style={{ gap: 4, flex: 1, marginRight: 12 }}>
-                {["주식", "금", "채권", "현금"].map((t) => {
+                {["주식", "채권", "금", "리츠", "현금"].map((t) => {
                   const v = a.items.filter((i) => i.t === t).reduce((s, i) => s + i.val, 0) + (t === "현금" ? a.cash : 0);
                   if (!v) return null;
                   return <div key={t} style={{ height: 6, borderRadius: 3, background: TYPE_COLOR[t], width: (v / a.total) * 100 + "%" }} />;
@@ -863,7 +909,7 @@ function Assets() {
           {open === a.id && (
             <div style={{ borderTop: "1px solid " + C.line, padding: "6px 16px 14px" }}>
               {a.items.filter((i) => i.q > 0).sort((x, y) => y.val - x.val).map((i) => (
-                <div key={i.tk} className="flex items-center justify-between" style={{ padding: "9px 0", borderBottom: "1px solid rgba(16,27,45,0.06)" }}>
+                <div key={i.tk} className="flex items-center justify-between" style={{ padding: "9px 0", borderBottom: "1px solid rgba(44,44,44,0.06)" }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, color: C.txt, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{i.n}</div>
                     <div style={{ ...NUM, fontSize: 10, color: C.dim, marginTop: 2 }}>{i.q}주 · 평단 {nf(i.avg)}</div>
@@ -887,7 +933,7 @@ function Assets() {
         <Card>
           <Eyebrow right={<span style={{ fontSize: 10, color: C.dim }}>전 계좌 합산</span>}>보유 종목 {BY_TICKER.length}개</Eyebrow>
           {BY_TICKER.map((b, idx) => (
-            <div key={b.tk} style={{ padding: "10px 0", borderTop: idx ? "1px solid rgba(16,27,45,0.06)" : "none" }}>
+            <div key={b.tk} style={{ padding: "10px 0", borderTop: idx ? "1px solid rgba(44,44,44,0.06)" : "none" }}>
               <div className="flex items-center justify-between">
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="flex items-center" style={{ gap: 6 }}>
@@ -904,7 +950,7 @@ function Assets() {
                 </div>
               </div>
               <div className="flex items-center" style={{ gap: 8, marginTop: 6 }}>
-                <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(16,27,45,0.08)" }}>
+                <div style={{ flex: 1, height: 4, borderRadius: 2, background: "rgba(44,44,44,0.08)" }}>
                   <div style={{ height: 4, borderRadius: 2, width: (b.wgt / BY_TICKER[0].wgt) * 100 + "%", background: TYPE_COLOR[b.t], opacity: 0.7 }} />
                 </div>
                 <span style={{ ...NUM, fontSize: 10, color: C.dim, width: 34, textAlign: "right" }}>{nf(b.wgt, 1)}%</span>
@@ -919,7 +965,7 @@ function Assets() {
         {REGION_MIX.map((r) => (
           <div key={r.name} className="flex items-center" style={{ gap: 10, marginBottom: 9 }}>
             <span style={{ fontSize: 12, color: C.mute, width: 34 }}>{r.name}</span>
-            <div style={{ flex: 1, height: 6, borderRadius: 3, background: "rgba(16,27,45,0.08)" }}>
+            <div style={{ flex: 1, height: 6, borderRadius: 3, background: "rgba(44,44,44,0.08)" }}>
               <div style={{ height: 6, borderRadius: 3, width: r.pctv + "%", background: C.violet, opacity: 0.8 }} />
             </div>
             <span style={{ ...NUM, fontSize: 11, color: C.txt, width: 40, textAlign: "right" }}>{nf(r.pctv, 1)}%</span>
@@ -965,7 +1011,7 @@ function Rebal({ thr, setThr }) {
         </div>
       </Card>
 
-      <Card style={{ background: needList.length ? "linear-gradient(160deg,#FBF1DC 0%,#FFFFFF 70%)" : C.surf }}>
+      <Card style={{ background: needList.length ? "linear-gradient(160deg,#FEF3E5 0%,#FFFFFF 70%)" : C.surf }}>
         <div className="flex items-center" style={{ gap: 8, marginBottom: 10 }}>
           {needList.length ? <AlertTriangle size={16} color={C.brass} /> : <Check size={16} color={C.teal} />}
           <span style={{ fontSize: 14, fontWeight: 700, color: C.txt }}>
@@ -988,7 +1034,7 @@ function Rebal({ thr, setThr }) {
                 <span style={{ ...NUM, fontSize: 15, fontWeight: 700, color: C.txt }}>{doneCnt}/{totOrders}</span>
               </div>
             </div>
-            <div style={{ height: 4, borderRadius: 2, background: "rgba(16,27,45,0.09)", marginTop: 12 }}>
+            <div style={{ height: 4, borderRadius: 2, background: "rgba(44,44,44,0.09)", marginTop: 12 }}>
               <div style={{ height: 4, borderRadius: 2, width: totOrders ? (doneCnt / totOrders) * 100 + "%" : 0, background: C.brass, transition: "width .2s" }} />
             </div>
           </>
@@ -998,7 +1044,7 @@ function Rebal({ thr, setThr }) {
       {plans.map((p) => {
         const isOpen = open === p.id;
         return (
-          <Card key={p.id} style={{ padding: 0, borderColor: p.need ? "rgba(169,118,26,0.40)" : C.line }}>
+          <Card key={p.id} style={{ padding: 0, borderColor: p.need ? "rgba(222,26,61,0.40)" : C.line }}>
             <div onClick={() => setOpen(isOpen ? null : p.id)} style={{ padding: 16, cursor: "pointer" }}>
               <div className="flex items-start justify-between">
                 <div>
@@ -1047,7 +1093,7 @@ function Rebal({ thr, setThr }) {
                       return (
                         <div key={key} onClick={() => setDone({ ...done, [key]: !ok })}
                           className="flex items-center"
-                          style={{ gap: 10, padding: "10px 0", borderBottom: "1px solid rgba(16,27,45,0.06)", cursor: "pointer", opacity: ok ? 0.45 : 1 }}>
+                          style={{ gap: 10, padding: "10px 0", borderBottom: "1px solid rgba(44,44,44,0.06)", cursor: "pointer", opacity: ok ? 0.45 : 1 }}>
                           <span style={{
                             width: 20, height: 20, borderRadius: 6, flexShrink: 0,
                             border: "1.5px solid " + (ok ? C.teal : C.line),
@@ -1219,7 +1265,7 @@ function Perf() {
             <span style={{ width: 52, textAlign: "right" }}>월</span>
           </div>
           {d.map((x) => (
-            <div key={x.m} className="flex items-center" style={{ padding: "9px 0", borderBottom: "1px solid rgba(16,27,45,0.06)" }}>
+            <div key={x.m} className="flex items-center" style={{ padding: "9px 0", borderBottom: "1px solid rgba(44,44,44,0.06)" }}>
               <span style={{ flex: 1, fontSize: 12, color: C.txt }}>{x.m}</span>
               <span style={{ width: 74, textAlign: "right" }}><Amt v={x.end} k size={11} weight={600} color={C.mute} /></span>
               <span style={{ width: 62, textAlign: "right" }}><Amt v={x.pl} k size={11} weight={600} color={sgn(x.pl)} /></span>
@@ -1273,7 +1319,7 @@ function Chip({ on, onClick, children }) {
   return (
     <button onClick={onClick}
       style={{
-        border: "1px solid " + (on ? C.brass : C.line), background: on ? "rgba(209,154,46,0.16)" : "transparent",
+        border: "1px solid " + (on ? C.brass : C.line), background: on ? "rgba(222,26,61,0.10)" : "transparent",
         color: on ? C.brass : C.mute, borderRadius: 999, padding: "7px 12px", fontSize: 11.5,
         fontWeight: 700, cursor: "pointer", fontFamily: FONT, whiteSpace: "nowrap",
       }}>{children}</button>
@@ -1282,6 +1328,7 @@ function Chip({ on, onClick, children }) {
 
 /* ---------- 계획 › 자산 ---------- */
 function PlanAsset() {
+  const SEV = sevCalc();
   const [a, setA] = useState(SIM_DEFAULT);
   const set = (k) => (v) => setA({ ...a, [k]: v });
   const data = useMemo(() => simulate(a), [a]);
@@ -1293,7 +1340,7 @@ function PlanAsset() {
 
   return (
     <div className="flex flex-col" style={{ gap: 12 }}>
-      <Card style={{ background: "linear-gradient(160deg,#E8EFFB 0%,#FFFFFF 65%)" }}>
+      <Card style={{ background: "linear-gradient(160deg,#DEDEED 0%,#FFFFFF 65%)" }}>
         <Eyebrow>은퇴자금 시뮬레이션</Eyebrow>
         <div style={{ fontSize: 13, color: C.mute, lineHeight: 1.6 }}>
           목표는 지금 가치로 <span style={{ color: C.txt, fontWeight: 700 }}>10억</span>.
@@ -1385,7 +1432,7 @@ function PlanAsset() {
       </Card>
 
       <Card>
-        <Eyebrow right={<Pill color={C.dim}>간이 계산</Pill>}>퇴직급여</Eyebrow>
+        <Eyebrow right={<Pill color={C.dim}>간이 계산 · 오늘 퇴사 가정</Pill>}>퇴직급여</Eyebrow>
         <Amt v={SEV.pay} size={22} weight={800} color={C.txt} />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
           {[["평균임금", nf(SEV.avg) + "원"], ["근속일수", nf(SEV.days) + "일"], ["입사", SEV.inDate], ["퇴사", SEV.outDate]].map(([l, v]) => (
@@ -1456,7 +1503,7 @@ function PlanEstate() {
 
   return (
     <div className="flex flex-col" style={{ gap: 12 }}>
-      <Card style={{ background: "linear-gradient(160deg,#FBF1DC 0%,#FFFFFF 70%)" }}>
+      <Card style={{ background: "linear-gradient(160deg,#FEF3E5 0%,#FFFFFF 70%)" }}>
         <Eyebrow right={<Pill color={C.dim}>2032년</Pill>}>상급지 갈아타기 로드맵</Eyebrow>
         <div style={{ fontSize: 12, color: C.mute }}>목표 상급지 가격 (2032년)</div>
         <Amt v={target} size={28} weight={800} color={C.txt} />
@@ -1480,7 +1527,7 @@ function PlanEstate() {
               <button key={c.k} onClick={() => setCi(i)}
                 style={{
                   textAlign: "left", cursor: "pointer", fontFamily: FONT,
-                  background: on ? "rgba(209,154,46,0.16)" : C.surf2,
+                  background: on ? "rgba(222,26,61,0.10)" : C.surf2,
                   border: "1px solid " + (on ? C.brass : C.line),
                   borderRadius: 12, padding: "10px 9px 11px",
                 }}>
@@ -1500,7 +1547,7 @@ function PlanEstate() {
           })}
         </div>
         <div style={{ marginTop: 16 }}>
-          <StackBar segs={[...parts, { nm: "부족", v: gap, c: "rgba(16,27,45,0.10)" }]} h={12} />
+          <StackBar segs={[...parts, { nm: "부족", v: gap, c: "rgba(44,44,44,0.10)" }]} h={12} />
         </div>
         <div style={{ marginTop: 8 }}>
           {parts.map((x) => <Row key={x.nm} c={x.c} nm={x.nm} v={x.v} p={(x.v / target) * 100} />)}
@@ -1520,7 +1567,7 @@ function PlanEstate() {
       </Card>
 
       {/* 부족액과 필요 저축 — 핵심 */}
-      <Card style={{ borderColor: gap > 0 ? "rgba(224,68,71,0.35)" : "rgba(18,144,122,0.35)" }}>
+      <Card style={{ borderColor: gap > 0 ? "rgba(228,35,19,0.35)" : "rgba(115,61,139,0.35)" }}>
         <Eyebrow right={<Pill color={gap > 0 ? C.up : C.teal}>{rc.k}</Pill>}>부족 금액</Eyebrow>
         <Amt v={gap} size={26} weight={800} color={gap > 0 ? C.up : C.teal} />
 
@@ -1741,7 +1788,7 @@ function DataPanel({ onClose, onDone }) {
               : "앱에 저장된 값을 보고 있습니다. data.json 이 옆에 있으면 자동으로 최신 값을 읽어옵니다."}
           </div>
           {st.err && (
-            <div style={{ background: "rgba(224,68,71,0.10)", borderRadius: 12, padding: 12, marginTop: 12 }}>
+            <div style={{ background: "rgba(228,35,19,0.10)", borderRadius: 12, padding: 12, marginTop: 12 }}>
               <div className="flex items-start" style={{ gap: 8 }}>
                 <AlertTriangle size={15} color={C.up} style={{ flexShrink: 0, marginTop: 1 }} />
                 <span style={{ fontSize: 12, color: C.txt, lineHeight: 1.55 }}>{st.err}</span>
@@ -1840,7 +1887,7 @@ export default function App() {
         </div>
 
         {/* 하단 탭 */}
-        <div style={{ display: "flex", borderTop: "1px solid " + C.line, background: C.surf, paddingBottom: 6, flexShrink: 0, boxShadow: "0 -4px 16px -8px rgba(16,27,45,0.15)" }}>
+        <div style={{ display: "flex", borderTop: "1px solid " + C.line, background: C.surf, paddingBottom: 6, flexShrink: 0, boxShadow: "0 -4px 16px -8px rgba(44,44,44,0.15)" }}>
           {TABS.map((t) => {
             const on = tab === t.id;
             const Icon = t.I;
